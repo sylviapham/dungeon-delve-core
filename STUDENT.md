@@ -5,20 +5,19 @@ step 3 of the Repository Setup page in Module 00.
 
 ---
 
-**Name:**
+**Name:** Sylvia Pham
 
-**STLCC email:**
+**STLCC email:** spham9@my.stlcc.edu
 
-**Section:**
+**Section:** IS 267 230
 
-**Machine you will use this term**
-(operating system, and whether it is a personal machine, a campus lab, or the
-virtual desktop)
+**Machine you will use this term** Personal MacBook Pro running macOS
 
-**Compiler and version**
-(the output of `g++ --version`, `clang++ --version`, or `cl`)
 
-**Backup plan if this machine fails in Week 5**
+**Compiler and version** Apple Clang 16.0.0
+
+
+**Backup plan if this machine fails in Week 5** I have a backup computer I can use to continue completing my assignments. I'll also keep my project on GitHub so I can access it from either computer.
 
 ---
 
