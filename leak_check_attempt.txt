@@ -1,0 +1,51 @@
+=================================================================
+==20020==ERROR: AddressSanitizer: attempting double-free on 0x603000001c30 in thread T0:
+    #0 0x1010502d4 in _ZdlPv+0x74 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x642d4)
+    #1 0x100b91b5c in main ownership_audit.cpp:120
+    #2 0x19f77c270  (<unknown module>)
+
+0x603000001c30 is located 0 bytes inside of 28-byte region [0x603000001c30,0x603000001c4c)
+freed by thread T0 here:
+    #0 0x1010502d4 in _ZdlPv+0x74 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x642d4)
+    #1 0x100b91aa4 in main ownership_audit.cpp:117
+    #2 0x19f77c270  (<unknown module>)
+
+previously allocated by thread T0 here:
+    #0 0x10104fe94 in _Znwm+0x74 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x63e94)
+    #1 0x100b90898 in make_rune(char const*, int) ownership_audit.cpp:52
+    #2 0x100b90f68 in build_satchel() ownership_audit.cpp:82
+    #3 0x100b91898 in main ownership_audit.cpp:105
+    #4 0x19f77c270  (<unknown module>)
+
+SUMMARY: AddressSanitizer: double-free (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x642d4) in _ZdlPv+0x74
+==20020==ABORTING
+Can't examine target process's malloc zone asan_0x101a7df98, so memory analysis will be incomplete or incorrect.
+Reason: for security, cannot load non-system library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/16/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
+
+Process 20020 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
+
+Process:         ownership_audit_asan [20020]
+Path:            /Users/USER/Downloads/*/ownership_audit_asan
+Load Address:    0x100b8c000
+Identifier:      ownership_audit_asan
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  leaks [20019]
+
+Date/Time:       2026-10-23 17:37:19.554 -0500
+Launch Time:     2026-10-23 17:37:18.787 -0500
+OS Version:      macOS 15.0 (24A8332)
+Report Version:  7
+Analysis Tool:   /Applications/Xcode.app/Contents/Developer/usr/bin/leaks
+Analysis Tool Version:  Xcode 16.2 (16C5032a)
+
+Physical footprint:         18.4M
+Physical footprint (peak):  18.5M
+Idle exit:                  untracked
+----
+
+leaks Report Version: 4.0
+Process 20020: 1 nodes malloced for 0 KB
+Process 20020: 0 leaks for 0 total leaked bytes.
+
