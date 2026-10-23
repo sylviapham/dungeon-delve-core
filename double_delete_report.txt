@@ -1,0 +1,26 @@
+=================================================================
+==19598==ERROR: AddressSanitizer: attempting double-free on 0x603000001c30 in thread T0:
+    #0 0x1050302d4 in _ZdlPv+0x74 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x642d4)
+    #1 0x104ba1b5c in main ownership_audit.cpp:120
+    #2 0x19f77c270  (<unknown module>)
+
+0x603000001c30 is located 0 bytes inside of 28-byte region [0x603000001c30,0x603000001c4c)
+freed by thread T0 here:
+    #0 0x1050302d4 in _ZdlPv+0x74 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x642d4)
+    #1 0x104ba1aa4 in main ownership_audit.cpp:117
+    #2 0x19f77c270  (<unknown module>)
+
+previously allocated by thread T0 here:
+    #0 0x10502fe94 in _Znwm+0x74 (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x63e94)
+    #1 0x104ba0898 in make_rune(char const*, int) ownership_audit.cpp:52
+    #2 0x104ba0f68 in build_satchel() ownership_audit.cpp:82
+    #3 0x104ba1898 in main ownership_audit.cpp:105
+    #4 0x19f77c270  (<unknown module>)
+
+SUMMARY: AddressSanitizer: double-free (libclang_rt.asan_osx_dynamic.dylib:arm64e+0x642d4) in _ZdlPv+0x74
+==19598==ABORTING
+runes in satchel ... 3
+total charge ....... 35
+strongest rune ..... Gale (15)
+spent Ember ........ 12
+total charge ....... 23
