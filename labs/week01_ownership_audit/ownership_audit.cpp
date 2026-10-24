@@ -110,8 +110,9 @@ int main()
     const Rune& strongest = strongest_rune(satchel);
     std::printf("strongest rune ..... %s (%d)\n", strongest.name, strongest.charge);
 
-    std::printf("spent Ember ....... %d\n", spend_rune(*satchel[0]));
+    std::printf("spent Ember........  %d\n", spend_rune(*satchel[0]));
     std::printf("total charge ....... %d\n", total_charge(satchel));
+
 
 
   ;
