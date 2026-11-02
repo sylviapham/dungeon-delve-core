@@ -138,13 +138,18 @@ int resolve_attack_on_hero(Monster& attacker, Hero& target);
 
 /* Week 2: Resolution overloads. */
 
-// Pass by const reference to avoid copying the hero and monster.
+// Passing by const reference avoids copying Hero and Monster,
+// saving memory and the cost of creating extra objects.
 int resolve(const Hero& hero, const Monster& monster);
 
-// Use an out-parameter to return damage through a reference.
+// The out-parameter writes the result into an existing Damage
+// object, avoiding a separate return value but requiring
+// the caller to provide an object that can be modified.
 void resolve(const Hero& hero, const Monster& monster, Damage& result);
 
-// Resolve damage against an armor value.
+// Damage is passed by const reference to avoid copying.
+// Returning Damage by value is simple, but may involve a
+// copy or move if the compiler cannot eliminate it.
 Damage resolve(const Damage& incoming, int armor);
 
 
