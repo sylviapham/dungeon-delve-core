@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "damage.h"
 
 /* ---------------------------------------------------------------------------
    Entities. Three separate structs. They share most of their fields but a
@@ -133,6 +134,19 @@ int apply_damage_to_monster(Monster& m, int incoming);
 int apply_damage_to_hero(Hero& h, int incoming);
 int resolve_attack_on_monster(Hero& attacker, Monster& target);
 int resolve_attack_on_hero(Monster& attacker, Hero& target);
+
+
+/* Week 2: Resolution overloads. */
+
+// Pass by const reference to avoid copying the hero and monster.
+int resolve(const Hero& hero, const Monster& monster);
+
+// Use an out-parameter to return damage through a reference.
+void resolve(const Hero& hero, const Monster& monster, Damage& result);
+
+// Resolve damage against an armor value.
+Damage resolve(const Damage& incoming, int armor);
+
 
 /* Abilities. */
 const char* ability_name(int tag);

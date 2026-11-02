@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "dice.h"
 
 /* ---------------------------------------------------------------------------
    RNG. Rolled our own so the numbers are the same on every machine, which
@@ -210,6 +211,30 @@ int apply_armor(int raw_damage, int armor)
     return out;
 }
 
+// Week 2: Resolve damage using const references.
+// const& avoids copying the Damage object.
+Damage resolve(const Damage& incoming, int armor)
+{
+    return Damage(apply_armor(incoming.amount(), armor));
+}
+
+// Week 2: Use an out-parameter to return damage.
+// const& avoids copying Hero and Monster.
+// The result is written through a reference instead of returned.
+void resolve(const Hero& hero, const Monster& monster, Damage& result)
+{
+    int raw_damage = compute_raw_damage(monster.strength, 2, 6);
+    result = Damage(apply_armor(raw_damage, hero.armor));
+}
+
+// Week 2: Return damage directly using const references.
+// Avoids copying Hero and Monster, but returns a Damage value.
+int resolve(const Hero& hero, const Monster& monster)
+{
+    int raw_damage = compute_raw_damage(monster.strength, 2, 6);
+    return apply_armor(raw_damage, hero.armor);
+}
+
 int apply_damage_to_monster(Monster& m, int incoming)
 {
     int final_damage = apply_armor(incoming, m.armor);
@@ -234,11 +259,13 @@ int apply_damage_to_hero(Hero& h, int incoming)
 /* Hero swings at a monster. Returns the damage that landed. */
 int resolve_attack_on_monster(Hero& attacker, Monster& target)
 {
-    int raw_damage = compute_raw_damage(attacker.strength, 3, 6);
-    int after_armor = apply_armor(raw_damage, target.armor);
+    Dice dice(3, 6);
+    int raw_damage = attacker.strength + roll_dice(dice.count(), dice.sides());
 
-    apply_damage_to_monster(target, raw_damage);
-    return after_armor;
+    Damage incoming(raw_damage);
+    int damage_dealt = apply_damage_to_monster(target, incoming.amount());
+
+    return damage_dealt;
 }
 
 /* Monster swings at the hero. Returns the damage that landed. */
