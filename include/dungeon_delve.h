@@ -31,8 +31,41 @@
    Entities. Three separate structs. They share most of their fields but a
    hero is not a monster and a monster is not a merchant, so three structs.
    --------------------------------------------------------------------------- */
+// Shared description interface.
+// Virtual inheritance prevents duplicate Describable objects.
+struct Describable {
+    virtual ~Describable() = default;
+    virtual std::string describe() const {
+        return "Entity";
+    }
+};
 
-struct Hero {
+struct Entity : virtual Describable {
+    virtual ~Entity() = default;
+};
+
+struct Combatant : virtual Describable {
+    virtual ~Combatant() = default;
+};
+
+struct Lootable : virtual Describable {
+    virtual ~Lootable() = default;
+};
+
+/*
+ Diamond inheritance:
+ Monster inherits from Entity, Combatant, and Lootable.
+ All three inherit virtually from Describable.
+ This ensures Monster has only one Describable
+ subobject instead of multiple copies.
+*/
+struct Hero : Entity, Combatant {
+    std::string describe() const override {
+    return std::string("[Hero] ") + name + " " +
+           std::to_string(hp) + "/" +
+           std::to_string(max_hp) + " HP combatant";
+}
+
     char name[32];
     int  hp;
     int  max_hp;
@@ -44,7 +77,14 @@ struct Hero {
     int  potions;
 };
 
-struct Monster {
+struct Monster : Entity, Combatant, Lootable {
+    std::string describe() const override {
+    return std::string("[Monster] ") + name + " " +
+           std::to_string(hp) + "/" +
+           std::to_string(max_hp) +
+           " HP combatant, lootable";
+}
+
     char name[32];
     char species[24];
     int  hp;
@@ -57,7 +97,12 @@ struct Monster {
     int  summon_budget;
 };
 
-struct Merchant {
+struct Merchant : Entity, Lootable {
+    std::string describe() const override {
+    return std::string("[Merchant] ") + name +
+           " -- lootable";
+}
+
     char name[32];
     int  gold;
     int  markup_percent;
