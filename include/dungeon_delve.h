@@ -21,11 +21,14 @@
 
 #ifndef DUNGEON_DELVE_H
 #define DUNGEON_DELVE_H
+class Ability;
 
 #include <memory>
 #include <string>
 #include <vector>
 #include "damage.h"
+
+class Ability;
 
 /* ---------------------------------------------------------------------------
    Entities. Three separate structs. They share most of their fields but a
@@ -95,6 +98,7 @@ struct Monster : Entity, Combatant, Lootable {
     int  ability_tag;
     int  is_dead;
     int  summon_budget;
+    std::shared_ptr<Ability> ability;
 };
 
 struct Merchant : Entity, Lootable {

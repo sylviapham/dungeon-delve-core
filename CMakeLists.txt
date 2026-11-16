@@ -73,12 +73,12 @@ endif()
 # Yes, compiling the same source file two different ways is an odd thing to
 # find in a codebase. Make a note of it for TRIAGE.md.
 # ---------------------------------------------------------------------------
-add_library(dd_engine STATIC src/dungeon_delve.cpp)
+add_library(dd_engine STATIC src/dungeon_delve.cpp src/abilities.cpp)
 target_include_directories(dd_engine PUBLIC include)
 target_compile_definitions(dd_engine PRIVATE DD_NO_MAIN)
 target_link_libraries(dd_engine PUBLIC dd_sanitize_flags)
 
-add_executable(dungeon_delve src/dungeon_delve.cpp)
+add_executable(dungeon_delve src/dungeon_delve.cpp src/abilities.cpp)
 target_include_directories(dungeon_delve PRIVATE include)
 target_link_libraries(dungeon_delve PRIVATE dd_sanitize_flags)
 
@@ -125,3 +125,5 @@ set_tests_properties(encounter_resolves loot_table_intact roster_survives_reallo
     PROPERTIES
         ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0:abort_on_error=0"
         TIMEOUT 60)
+add_subdirectory(labs/week03_same_problem_twice)
+add_subdirectory(labs/week04_kill_the_switch)

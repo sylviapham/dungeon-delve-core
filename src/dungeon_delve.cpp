@@ -16,6 +16,7 @@
    =========================================================================== */
 
 #include "dungeon_delve.h"
+#include "ability.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -131,6 +132,30 @@ HeroPtr make_hero(const char* name, int hp, int strength, int armor)
     return h;
 }
 
+std::shared_ptr<Ability> make_ability(int tag)
+{
+    switch (tag) {
+        case ABIL_NONE:
+            return std::make_shared<FlailAbility>();
+        case ABIL_CLEAVE:
+            return std::make_shared<CleaveAbility>();
+        case ABIL_BITE:
+            return std::make_shared<BiteAbility>();
+        case ABIL_MEND:
+            return std::make_shared<MendAbility>();
+        case ABIL_HEX:
+            return std::make_shared<HexAbility>();
+        case ABIL_SUMMON:
+            return std::make_shared<SummonAbility>();
+        case ABIL_GUARD:
+            return std::make_shared<GuardAbility>();
+        case ABIL_RALLY:
+            return std::make_shared<RallyAbility>();
+    default:
+        return nullptr;
+    }
+}
+
 MonsterPtr make_monster(const char* name, const char* species,
                         int hp, int strength, int armor,
                         int gold_drop, int ability_tag)
@@ -146,6 +171,7 @@ MonsterPtr make_monster(const char* name, const char* species,
     m->armor         = armor;
     m->gold_drop     = gold_drop;
     m->ability_tag   = ability_tag;
+    m->ability = make_ability(ability_tag);
     m->is_dead       = 0;
     m->summon_budget = (ability_tag == ABIL_SUMMON) ? 1 : 0;
     return m;
@@ -463,7 +489,7 @@ int run_monster_round(Wave& wave, Hero& hero, int verbose,
     int total = 0;
 
     for (size_t i = 0; i < wave.size(); ++i) {
-    Monster* m = raw(wave[i]);
+        Monster* m = raw(wave[i]);
 
         if (m->is_dead) continue;
         if (hero.hp <= 0) break;
@@ -471,7 +497,14 @@ int run_monster_round(Wave& wave, Hero& hero, int verbose,
         if (acted_names != nullptr)
             acted_names->push_back(std::string(m->name));
 
-        total += resolve_ability(m->ability_tag, *m, hero, wave, verbose);
+        try {
+            total += m->ability->apply(*m, hero, wave, verbose);
+        }
+        catch (const std::exception& e) {
+            if (verbose) {
+                std::printf("Ability failed: %s\n", e.what());
+            }
+        }
     }
 
     return total;
