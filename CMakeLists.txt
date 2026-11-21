@@ -73,12 +73,12 @@ endif()
 # Yes, compiling the same source file two different ways is an odd thing to
 # find in a codebase. Make a note of it for TRIAGE.md.
 # ---------------------------------------------------------------------------
-add_library(dd_engine STATIC src/dungeon_delve.cpp src/abilities.cpp)
+add_library(dd_engine STATIC src/dungeon_delve.cpp)
 target_include_directories(dd_engine PUBLIC include)
 target_compile_definitions(dd_engine PRIVATE DD_NO_MAIN)
 target_link_libraries(dd_engine PUBLIC dd_sanitize_flags)
 
-add_executable(dungeon_delve src/dungeon_delve.cpp src/abilities.cpp)
+add_executable(dungeon_delve src/dungeon_delve.cpp)
 target_include_directories(dungeon_delve PRIVATE include)
 target_link_libraries(dungeon_delve PRIVATE dd_sanitize_flags)
 
@@ -89,8 +89,22 @@ target_link_libraries(dungeon_delve PRIVATE dd_sanitize_flags)
 # idea outside the engine. They are not part of the game and nothing in the
 # engine depends on them.
 # ---------------------------------------------------------------------------
-add_executable(ownership_audit labs/week01_ownership_audit/ownership_audit.cpp)
-target_link_libraries(ownership_audit PRIVATE dd_sanitize_flags)
+# Lab targets live in subdirectories now, which by default would put their
+# executables under build/<preset>/labs/<name>/. Every instruction in this
+# course says ./build/<preset>/<name>, so pin the output directory and keep
+# that true.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Each lab folder carries its own CMakeLists.txt and is added only if it is
+# present. A lab that has not been published yet is simply absent, so the
+# project still configures, and publishing one is a git pull with no edit here.
+file(GLOB DD_LAB_DIRS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/labs
+     ${CMAKE_CURRENT_SOURCE_DIR}/labs/*)
+foreach(dd_lab ${DD_LAB_DIRS})
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/labs/${dd_lab}/CMakeLists.txt)
+    add_subdirectory(labs/${dd_lab})
+  endif()
+endforeach()
 
 # ---------------------------------------------------------------------------
 # Tests.
@@ -125,5 +139,3 @@ set_tests_properties(encounter_resolves loot_table_intact roster_survives_reallo
     PROPERTIES
         ENVIRONMENT "ASAN_OPTIONS=detect_leaks=0:abort_on_error=0"
         TIMEOUT 60)
-add_subdirectory(labs/week03_same_problem_twice)
-add_subdirectory(labs/week04_kill_the_switch)
