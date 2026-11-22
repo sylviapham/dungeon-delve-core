@@ -25,6 +25,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <map>
+#include <set>
+#include <algorithm>
 #include "dice.h"
 
 /* ---------------------------------------------------------------------------
@@ -416,24 +419,7 @@ int resolve_ability(int tag, Monster& self, Hero& hero,
    Bestiary lookup.
    --------------------------------------------------------------------------- */
 
-Monster* find_in_bestiary(Bestiary& bestiary, const char* species)
-{
-    for (size_t i = 0; i < bestiary.size(); i++) {
-        if (std::strcmp(bestiary[i]->species, species) == 0)
-            return raw(bestiary[i]);
-    }
-    return nullptr;
-}
 
-int count_species_in_bestiary(Bestiary& bestiary, const char* species)
-{
-    int n = 0;
-    for (size_t i = 0; i < bestiary.size(); i++) {
-        if (std::strcmp(bestiary[i]->species, species) == 0)
-            n++;
-    }
-    return n;
-}
 
 Bestiary build_bestiary()
 {
@@ -450,10 +436,24 @@ Bestiary build_bestiary()
     return b;
 }
 
-MonsterPtr spawn_from_bestiary(Bestiary& bestiary, const char* species)
+std::map<std::string, Monster*> build_bestiary_index(const Bestiary& bestiary)
 {
-    Monster* proto = find_in_bestiary(bestiary, species);
-    if (proto == nullptr) return MonsterPtr{};
+    std::map<std::string, Monster*> index;
+
+    for (const auto& monster : bestiary) {
+        index[monster->species] = monster.get();
+    }
+
+    return index;
+}
+
+MonsterPtr spawn_from_bestiary(
+    const std::map<std::string, Monster*>& bestiary_index,
+    const char* species)
+{
+    auto it = bestiary_index.find(species);
+    if (it == bestiary_index.end()) return MonsterPtr{};
+Monster* proto = it->second;
 
     return make_monster(proto->name, proto->species, proto->max_hp,
                         proto->strength, proto->armor, proto->gold_drop,
@@ -753,24 +753,32 @@ void print_loot_table()
    The campaign.
    --------------------------------------------------------------------------- */
 
-Wave build_wave(Bestiary& bestiary, const char* a, const char* b, const char* c)
+
+Wave build_wave(const std::map<std::string, Monster*>& bestiary_index,
+                const char* a, const char* b, const char* c)
 {
     Wave wave;
 
     if (a != nullptr) {
-        MonsterPtr m = spawn_from_bestiary(bestiary, a);
+        MonsterPtr m = spawn_from_bestiary(bestiary_index, a);
         if (raw(m) != nullptr) wave.push_back(std::move(m));
     }
     if (b != nullptr) {
-        MonsterPtr m = spawn_from_bestiary(bestiary, b);
+        MonsterPtr m = spawn_from_bestiary(bestiary_index, b);
         if (raw(m) != nullptr) wave.push_back(std::move(m));
     }
     if (c != nullptr) {
-        MonsterPtr m = spawn_from_bestiary(bestiary, c);
+        MonsterPtr m = spawn_from_bestiary(bestiary_index, c);
         if (raw(m) != nullptr) wave.push_back(std::move(m));
     }
 
     return wave;
+}
+
+bool compare_names_descending(const std::string& a,
+                              const std::string& b)
+{
+    return a > b;
 }
 
 int run_campaign(int verbose)
@@ -778,8 +786,46 @@ int run_campaign(int verbose)
     print_banner();
 
     Bestiary    bestiary = build_bestiary();
+    auto bestiary_index = build_bestiary_index(bestiary);
+    std::set<std::string> encountered_species;
     HeroPtr     hero_owner = make_hero("Ash", 100, 10, 3);
     MerchantPtr yarrow_owner = make_merchant("Old Yarrow", 400, 35);
+
+    std::vector<std::string> party_roster = {
+    "Ash",
+    "Briar",
+    "Cinder"
+};
+std::vector<std::string> roster_by_name = party_roster;
+
+std::sort(roster_by_name.begin(), roster_by_name.end(),
+          [](const std::string& a, const std::string& b) {
+              return a < b;
+          });
+
+struct NameLengthComparator {
+    bool operator()(const std::string& a,
+                    const std::string& b) const {
+        if (a.size() != b.size()) {
+            return a.size() < b.size();
+        }
+        return a < b;
+    }
+};
+
+std::vector<std::string> roster_by_length = party_roster;
+
+std::sort(roster_by_length.begin(), roster_by_length.end(),
+          NameLengthComparator{});
+
+std::vector<std::string> roster_by_reverse_name = party_roster;
+
+bool (*name_comparator)(const std::string&,
+                        const std::string&) = &compare_names_descending;
+
+std::sort(roster_by_reverse_name.begin(),
+          roster_by_reverse_name.end(),
+          name_comparator);
 
     Hero&     hero = *hero_owner;          /* non-owning alias for readability */
     Merchant& yarrow = *yarrow_owner;      /* non-owning alias for readability */
@@ -803,10 +849,16 @@ int run_campaign(int verbose)
 
     for (int stage = 0; stage < 6; stage++) {
 
-        Wave wave = build_wave(bestiary,
-                               script[stage][0],
-                               script[stage][1],
-                               script[stage][2]);
+        Wave wave = build_wave(bestiary_index,
+                       script[stage][0],
+                       script[stage][1],
+                       script[stage][2]);
+
+    for (const auto& monster : wave) {
+        if (monster) {
+        encountered_species.insert(monster->species);
+    }
+}
 
         if (verbose) {
             std::printf("\n");
@@ -843,9 +895,35 @@ int run_campaign(int verbose)
         std::printf("\n");
     }
 
-    save_hero(hero, "ash.save");
 
-    return cleared;
+save_hero(hero, "ash.save");
+
+// Build Sprint 05: Display the sorted party roster.
+if (verbose) {
+    std::printf("\n=== PARTY ROSTER ===\n");
+
+    std::printf("Alphabetical: ");
+    for (const auto& name : roster_by_name) {
+        std::printf("%s ", name.c_str());
+    }
+
+    std::printf("\nBy name length: ");
+    for (const auto& name : roster_by_length) {
+        std::printf("%s ", name.c_str());
+    }
+
+    std::printf("\nReverse alphabetical: ");
+    for (const auto& name : roster_by_reverse_name) {
+        std::printf("%s ", name.c_str());
+    }
+
+    std::printf("\n\n=== SPECIES ENCOUNTERED ===\n");
+    std::printf("Unique species: %zu\n",
+                encountered_species.size());
+}
+
+return cleared;
+
 }
 
 /* ---------------------------------------------------------------------------

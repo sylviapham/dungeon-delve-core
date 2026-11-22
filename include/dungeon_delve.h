@@ -208,8 +208,6 @@ int resolve_ability(int tag, Monster& self, Hero& hero, Wave& wave, int verbose)
 
 /* Bestiary. */
 Bestiary   build_bestiary();
-Monster*   find_in_bestiary(Bestiary& bestiary, const char* species);
-int        count_species_in_bestiary(Bestiary& bestiary, const char* species);
 MonsterPtr spawn_from_bestiary(Bestiary& bestiary, const char* species);
 
 /* Encounters. */

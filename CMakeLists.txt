@@ -73,12 +73,12 @@ endif()
 # Yes, compiling the same source file two different ways is an odd thing to
 # find in a codebase. Make a note of it for TRIAGE.md.
 # ---------------------------------------------------------------------------
-add_library(dd_engine STATIC src/dungeon_delve.cpp)
+add_library(dd_engine STATIC src/dungeon_delve.cpp src/abilities.cpp)
 target_include_directories(dd_engine PUBLIC include)
 target_compile_definitions(dd_engine PRIVATE DD_NO_MAIN)
 target_link_libraries(dd_engine PUBLIC dd_sanitize_flags)
 
-add_executable(dungeon_delve src/dungeon_delve.cpp)
+add_executable(dungeon_delve src/dungeon_delve.cpp src/abilities.cpp)
 target_include_directories(dungeon_delve PRIVATE include)
 target_link_libraries(dungeon_delve PRIVATE dd_sanitize_flags)
 
@@ -113,6 +113,14 @@ enable_testing()
 
 add_executable(regression tests/regression.cpp)
 target_link_libraries(regression PRIVATE dd_engine dd_sanitize_flags)
+
+# Build 05 - Container tests
+add_executable(build05_tests tests/build05_tests.cpp)
+target_include_directories(build05_tests PRIVATE include)
+target_link_libraries(build05_tests PRIVATE dd_engine dd_sanitize_flags)
+
+add_test(NAME build05_species_unique
+         COMMAND build05_tests)
 
 add_test(NAME encounter_resolves
          COMMAND regression encounter_resolves)
